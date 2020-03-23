@@ -16,6 +16,14 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
+/* eslint "react/react-in-jsx-scope": "off" */
+
+/* globals React ReactDOM */
+
+/* eslint "react/jsx-no-undef": "off" */
+
+/* eslint "react/no-multi-comp": "off" */
+// eslint-disable-next-line react/prefer-stateless-function
 var ProductList = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(ProductList, _React$Component);
 
@@ -39,41 +47,22 @@ var ProductList = /*#__PURE__*/function (_React$Component) {
 
   _proto.loadData = /*#__PURE__*/function () {
     var _loadData = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-      var query, response, body, result, results;
+      var query, data;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              query = "query {\n      productList {\n        id category name\n        price image\n      }\n    }";
+              query = "query {\n      productList {\n        id Category Name Price Image\n      }\n    }";
               _context.next = 3;
-              return fetch('/graphql', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  query: query
-                })
-              });
+              return graphQLFetch(query);
 
             case 3:
-              response = _context.sent;
-              _context.next = 6;
-              return response.text();
-
-            case 6:
-              body = _context.sent;
-              _context.next = 9;
-              return JSON.parse(body);
-
-            case 9:
-              result = _context.sent;
-              results = result.data.productList;
-              this.setState({
-                products: results
+              data = _context.sent;
+              data && this.setState({
+                products: data.productList
               });
 
-            case 12:
+            case 5:
             case "end":
               return _context.stop();
           }
@@ -90,30 +79,22 @@ var ProductList = /*#__PURE__*/function (_React$Component) {
 
   _proto.addProduct = /*#__PURE__*/function () {
     var _addProduct = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(product) {
-      var query;
+      var query, data;
       return regeneratorRuntime.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
               query = "mutation productAdd($product: ProductInputs!) {\n      productAdd(product: $product) {\n        id\n      }\n    }";
               _context2.next = 3;
-              return fetch('/graphql', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  query: query,
-                  variables: {
-                    product: product
-                  }
-                })
+              return graphQLFetch(query, {
+                product: product
               });
 
             case 3:
-              this.loadData();
+              data = _context2.sent;
+              data && this.loadData();
 
-            case 4:
+            case 5:
             case "end":
               return _context2.stop();
           }
@@ -162,10 +143,11 @@ function ProductTable(_ref) {
 function ProductRow(_ref2) {
   var index = _ref2.index,
       product = _ref2.product;
+  console.log(product);
   return /*#__PURE__*/React.createElement("tr", {
     key: index
-  }, /*#__PURE__*/React.createElement("th", null, product.name), /*#__PURE__*/React.createElement("th", null, "$", product.price), /*#__PURE__*/React.createElement("th", null, product.category), /*#__PURE__*/React.createElement("th", null, /*#__PURE__*/React.createElement("a", {
-    href: product.image,
+  }, /*#__PURE__*/React.createElement("th", null, product.Name), /*#__PURE__*/React.createElement("th", null, "$", product.Price), /*#__PURE__*/React.createElement("th", null, product.Category), /*#__PURE__*/React.createElement("th", null, /*#__PURE__*/React.createElement("a", {
+    href: product.Image,
     target: "_blank"
   }, "View")));
 }
@@ -193,10 +175,10 @@ var ProductAdd = /*#__PURE__*/function (_React$Component2) {
   _proto2.onSubmit = function onSubmit(e) {
     e.preventDefault();
     var product = {
-      name: this.state.name,
-      price: parseInt(this.state.price),
-      category: this.state.category,
-      image: this.state.image
+      Name: this.state.name,
+      Price: parseInt(this.state.price),
+      Category: this.state.category,
+      Image: this.state.image
     };
     this.props.addProduct(product);
     this.setState({
@@ -262,6 +244,53 @@ var ProductAdd = /*#__PURE__*/function (_React$Component2) {
 
   return ProductAdd;
 }(React.Component);
+
+function graphQLFetch(_x2, _x3) {
+  return _graphQLFetch.apply(this, arguments);
+}
+
+function _graphQLFetch() {
+  _graphQLFetch = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(query, variables) {
+    var response, body, result;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            if (variables === void 0) {
+              variables = {};
+            }
+
+            _context3.next = 3;
+            return fetch(window.ENV.UI_API_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                query: query,
+                variables: variables
+              })
+            });
+
+          case 3:
+            response = _context3.sent;
+            _context3.next = 6;
+            return response.text();
+
+          case 6:
+            body = _context3.sent;
+            result = JSON.parse(body);
+            return _context3.abrupt("return", result.data);
+
+          case 9:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _graphQLFetch.apply(this, arguments);
+}
 
 var element = /*#__PURE__*/React.createElement(ProductList, null);
 ReactDOM.render(element, document.getElementById('root'));
